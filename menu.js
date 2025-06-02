@@ -1,4 +1,4 @@
-import { database, dishesRef, categoriesRef } from '../firebaseConfig.js';
+import { database, dishesRef, categoriesRef } from './firebaseConfig.js';
 import { ref, get, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
 const dishList = document.getElementById('dishList');
