@@ -1,0 +1,73 @@
+/* home.css */
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f8f8f8;
+    color: #333;
+}
+
+#mh {
+    text-align: center;
+    margin: 40px 0 20px;
+    font-size: 2.5rem;
+    color: #2c3e50;
+}
+
+
+
+#mh span {
+    display: block;
+    font-size: 1.2rem;
+    margin-top: 10px;
+    color: #7f8c8d;
+}
+
+.main {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 40px;
+    padding: 20px;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.mainineer {
+    background: #ffffff;
+    padding: 40px 60px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    min-width: 200px;
+    text-align: center;
+}
+
+.mainineer h1 {
+    font-size: 1.5rem;
+    color: #34495e;
+    margin: 0;
+}
+
+.mainineer:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    background-color: #ecf0f1;
+    cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .main {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .mainineer {
+        width: 80%;
+    }
+}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Menu - Hotel Krushnali, Savda</title>
+  <link rel="stylesheet" href="menu.css">
+</head>
+<body>
+  <header>
+    <h1>Hotel Krushnali, Savda</h1>
+    <h2>Our Menu</h2>
+  </header>
+
+  <!-- Filters -->
+  <div class="filters">
+    <select id="filterCategory">
+      <option value="">All Categories</option>
+    </select>
+
+    <select id="filterType">
+      <option value="">All Types</option>
+      <option value="Veg">Veg 🟢</option>
+      <option value="Non-Veg">Non-Veg 🔴</option>
+    </select>
+
+    <select id="sortPrice">
+      <option value="">Sort by Price</option>
+      <option value="asc">Price: Low to High</option>
+      <option value="desc">Price: High to Low</option>
+    </select>
+  </div>
+
+  <!-- Dish List -->
+  <ul id="dishList"></ul>
+
+  <script type="module" src="menu.js"></script>
+</body>
+</html>

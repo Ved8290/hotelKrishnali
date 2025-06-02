@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Manage Categories</title>
+  <link rel="stylesheet" href="category.css" />
+  <style>
+    /* Alert styles */
+    #alertBox {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #27ae60;
+      color: white;
+      padding: 15px 25px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      font-weight: 600;
+      font-size: 1rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      z-index: 1000;
+    }
+    #alertBox.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #alertBox.error {
+      background-color: #e74c3c;
+    }
+
+    /* Basic layout */
+    body {
+      font-family: Arial, sans-serif;
+      padding: 10px;
+      max-width: 600px;
+      margin: auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .btn-group button {
+      margin-left: 5px;
+      padding: 5px 10px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .btn-group button.delete {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    .btn-group button.edit {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    .btn-group button.save {
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    .btn-group button.cancel {
+      background-color: #95a5a6;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    input.edit-input {
+      font-size: 1rem;
+      padding: 4px 8px;
+      width: 70%;
+    }
+    ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <!-- Shared Header -->
+  <header>
+    <h1>Hotel Krushnali, Savda</h1>
+  </header>
+
+  <main class="container">
+    <section class="add-category">
+      <h2>Add New Category</h2>
+      <form id="categoryForm">
+        <input type="text" name="categoryName" placeholder="Enter category name" required />
+        <button type="submit">Add</button>
+      </form>
+    </section>
+
+    <section class="category-list">
+      <h2>Your Categories</h2>
+      <ul></ul>
+    </section>
+  </main>
+
+  <!-- Alert dialog box -->
+  <div id="alertBox"></div>
+
+  <script type="module">
+    import { database } from '../firebaseConfig.js';
+    import {
+      ref,
+      push,
+      onValue,
+      remove,
+      update
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const form = document.getElementById("categoryForm");
+    const input = document.querySelector('input[name="categoryName"]');
+    const list = document.querySelector(".category-list ul");
+    const alertBox = document.getElementById("alertBox");
+
+    // Reference to 'categories' node in database
+    const categoriesRef = ref(database, 'categories');
+
+    // Show alert message helper
+    function showAlert(message, isError = false) {
+      alertBox.textContent = message;
+      alertBox.className = "";
+      alertBox.classList.add("show");
+      if (isError) alertBox.classList.add("error");
+
+      setTimeout(() => {
+        alertBox.classList.remove("show");
+      }, 2500);
+    }
+
+    // Add new category
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = input.value.trim();
+      if (!name) {
+        showAlert("Category name cannot be empty!", true);
+        return;
+      }
+      try {
+        await push(categoriesRef, { name });
+        showAlert("Category added successfully!");
+        input.value = "";
+      } catch (error) {
+        showAlert("Failed to add category. Try again.", true);
+        console.error(error);
+      }
+    });
+
+    // Listen for realtime updates and render list
+    onValue(categoriesRef, (snapshot) => {
+      list.innerHTML = "";
+      snapshot.forEach((child) => {
+        const key = child.key;
+        const { name } = child.val();
+        const li = document.createElement("li");
+        li.dataset.id = key;
+        li.innerHTML = `
+          <span class="category-name">${name}</span>
+          <div class="btn-group">
+            <button class="edit">Edit</button>
+            <button class="delete">Delete</button>
+          </div>
+        `;
+        list.appendChild(li);
+      });
+    });
+
+    // Handle click events (edit, delete, save, cancel)
+    list.addEventListener("click", async (e) => {
+      const li = e.target.closest("li");
+      if (!li) return;
+      const id = li.dataset.id;
+
+      if (e.target.classList.contains("delete")) {
+        // Delete
+        const itemRef = ref(database, `categories/${id}`);
+        try {
+          await remove(itemRef);
+          showAlert("Category deleted successfully!");
+        } catch (error) {
+          showAlert("Failed to delete category. Try again.", true);
+          console.error(error);
+        }
+      } else if (e.target.classList.contains("edit")) {
+        // Enter edit mode
+        const span = li.querySelector(".category-name");
+        const currentName = span.textContent;
+        // Replace span with input field
+        span.outerHTML = `<input type="text" class="edit-input" value="${currentName}" />`;
+
+        // Replace buttons with Save and Cancel
+        const btnGroup = li.querySelector(".btn-group");
+        btnGroup.innerHTML = `
+          <button class="save">Save</button>
+          <button class="cancel">Cancel</button>
+        `;
+      } else if (e.target.classList.contains("cancel")) {
+        // Cancel edit, restore original name and buttons
+        const inputField = li.querySelector(".edit-input");
+        const originalName = inputField.defaultValue; // initial value
+        inputField.outerHTML = `<span class="category-name">${originalName}</span>`;
+
+        const btnGroup = li.querySelector(".btn-group");
+        btnGroup.innerHTML = `
+          <button class="edit">Edit</button>
+          <button class="delete">Delete</button>
+        `;
+      } else if (e.target.classList.contains("save")) {
+        // Save edited name
+        const inputField = li.querySelector(".edit-input");
+        const newName = inputField.value.trim();
+        if (!newName) {
+          showAlert("Category name cannot be empty!", true);
+          return;
+        }
+        const itemRef = ref(database, `categories/${id}`);
+        try {
+          await update(itemRef, { name: newName });
+          showAlert("Category updated successfully!");
+          // onValue listener will re-render, so no need to manually update UI here
+        } catch (error) {
+          showAlert("Failed to update category. Try again.", true);
+          console.error(error);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

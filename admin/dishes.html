@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Manage Dishes - Hotel Krushnali, Savda</title>
+  <link rel="stylesheet" href="./dishes.css" />
+</head>
+<body>
+  <header>
+    <h1>Hotel Krushnali, Savda</h1>
+    <h2>Manage Dishes</h2>
+  </header>
+
+  <div id="alertBox"></div>
+
+  <!-- Dish Form -->
+  <form id="dishForm">
+    <label for="dishName">Dish Name</label>
+    <input type="text" id="dishName" placeholder="Enter dish name" required />
+
+    <label for="categorySelect">Category</label>
+    <select id="categorySelect" required>
+      <option value="" disabled selected>Select category</option>
+    </select>
+
+    <label>Type</label>
+    <div class="radio-group">
+      <label><input type="radio" name="vegNonVeg" value="Veg" required /> Veg</label>
+      <label><input type="radio" name="vegNonVeg" value="Non-Veg" required /> Non-Veg</label>
+    </div>
+
+    <label for="priceInput">Price (₹)</label>
+    <input type="number" id="priceInput" placeholder="Enter price" min="0" required />
+
+    <label for="imgLink">Image Link</label>
+    <input type="text" id="imgLink" placeholder="Paste image URL here" required />
+    <img id="imgPreview" alt="Image Preview" />
+
+    <button type="submit" id="submitBtn">Add Dish</button>
+  </form>
+
+  <!-- Filters -->
+  <div class="filters">
+    <select id="filterCategory">
+      <option value="">All Categories</option>
+    </select>
+
+    <select id="filterType">
+      <option value="">All Types</option>
+      <option value="Veg">Veg 🟢</option>
+      <option value="Non-Veg">Non-Veg 🔴</option>
+    </select>
+
+    <select id="sortPrice">
+      <option value="">Sort by Price</option>
+      <option value="asc">Price: Low to High</option>
+      <option value="desc">Price: High to Low</option>
+    </select>
+  </div>
+
+  <!-- Dish List -->
+  <ul id="dishList"></ul>
+
+  <script type="module">
+    import { database, dishesRef, categoriesRef } from '../firebaseConfig.js';
+    import {
+      ref,
+      push,
+      set,
+      onValue,
+      update,
+      remove,
+      get
+    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+    const dishForm = document.getElementById('dishForm');
+    const dishList = document.getElementById('dishList');
+    const categorySelect = document.getElementById('categorySelect');
+    const filterCategory = document.getElementById('filterCategory');
+    const filterType = document.getElementById('filterType');
+    const sortPrice = document.getElementById('sortPrice');
+    const imgLinkInput = document.getElementById('imgLink');
+    const imgPreview = document.getElementById('imgPreview');
+    const alertBox = document.getElementById('alertBox');
+    const submitBtn = document.getElementById('submitBtn');
+    let editingDishId = null;
+    let allDishes = {};
+
+    function showAlert(message, isError = false) {
+      alertBox.textContent = message;
+      alertBox.className = 'show' + (isError ? ' error' : '');
+      setTimeout(() => {
+        alertBox.className = '';
+      }, 3000);
+    }
+
+    function loadCategories() {
+      get(categoriesRef).then(snapshot => {
+        const categories = snapshot.val();
+        if (categories) {
+          categorySelect.innerHTML = '<option value="" disabled selected>Select category</option>';
+          filterCategory.innerHTML = '<option value="">All Categories</option>';
+          Object.entries(categories).forEach(([id, cat]) => {
+            const name = cat.name || cat;
+            categorySelect.innerHTML += `<option value="${id}">${name}</option>`;
+            filterCategory.innerHTML += `<option value="${id}">${name}</option>`;
+          });
+        } else {
+          categorySelect.innerHTML = '<option value="" disabled>No categories found</option>';
+          filterCategory.innerHTML = '<option value="" disabled>No categories</option>';
+        }
+      }).catch(err => {
+        console.error('Error loading categories:', err);
+      });
+    }
+
+    loadCategories();
+
+    imgLinkInput.addEventListener('input', () => {
+      const url = imgLinkInput.value.trim();
+      imgPreview.src = url || '';
+      imgPreview.style.display = url ? 'block' : 'none';
+    });
+
+    function clearForm() {
+      dishForm.reset();
+      imgPreview.src = '';
+      imgPreview.style.display = 'none';
+      submitBtn.textContent = 'Add Dish';
+      editingDishId = null;
+    }
+
+    function renderDishes(dishes) {
+      dishList.innerHTML = '';
+      if (!dishes || Object.keys(dishes).length === 0) {
+        dishList.innerHTML = '<li>No dishes available.</li>';
+        return;
+      }
+
+      Object.entries(dishes).forEach(([id, dish]) => {
+        const li = document.createElement('li');
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'image-wrapper';
+
+        const img = document.createElement('img');
+        img.className = 'dish-img';
+        img.alt = dish.name;
+        img.src = dish.imageLink;
+
+        const symbol = document.createElement('div');
+        symbol.className = 'type-symbol';
+        symbol.textContent = dish.vegNonVeg === 'Veg' ? '🟢' : '🔴';
+
+        wrapper.appendChild(img);
+        wrapper.appendChild(symbol);
+
+        const details = document.createElement('div');
+        details.className = 'dish-details';
+
+        details.innerHTML = `
+          <div class="dish-name">${dish.name}</div>
+          <div class="dish-info">Category: ${dish.categoryName || 'Unknown'}</div>
+          <div class="dish-info">Type: ${dish.vegNonVeg}</div>
+          <div class="dish-info">Price: ₹${dish.price}</div>
+        `;
+
+        const btnGroup = document.createElement('div');
+        btnGroup.className = 'btn-group';
+
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit';
+        editBtn.textContent = 'Edit';
+        editBtn.addEventListener('click', () => editDish(id, dish));
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'delete';
+        delBtn.textContent = 'Delete';
+        delBtn.addEventListener('click', () => deleteDish(id));
+
+        btnGroup.appendChild(editBtn);
+        btnGroup.appendChild(delBtn);
+        details.appendChild(btnGroup);
+
+        li.appendChild(wrapper);
+        li.appendChild(details);
+        dishList.appendChild(li);
+      });
+    }
+
+    function editDish(id, dish) {
+      editingDishId = id;
+      dishForm.dishName.value = dish.name;
+      dishForm.categorySelect.value = dish.category;
+      dishForm.vegNonVeg.value = dish.vegNonVeg;
+      dishForm.priceInput.value = dish.price;
+      dishForm.imgLink.value = dish.imageLink || '';
+      imgPreview.src = dish.imageLink || '';
+      imgPreview.style.display = dish.imageLink ? 'block' : 'none';
+      submitBtn.textContent = 'Update Dish';
+    }
+
+    function deleteDish(id) {
+      if (confirm('Are you sure you want to delete this dish?')) {
+        remove(ref(database, 'dishes/' + id))
+          .then(() => showAlert('Dish deleted successfully'))
+          .catch(err => showAlert('Error deleting dish: ' + err.message, true));
+      }
+    }
+
+    dishForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const name = dishForm.dishName.value.trim();
+      const category = dishForm.categorySelect.value;
+      const vegNonVeg = dishForm.vegNonVeg.value;
+      const price = parseFloat(dishForm.priceInput.value);
+      const imageLink = dishForm.imgLink.value.trim();
+
+      if (!name || !category || !vegNonVeg || isNaN(price)) {
+        showAlert('Please fill all required fields correctly.', true);
+        return;
+      }
+
+      const dishData = { name, category, vegNonVeg, price, imageLink };
+
+      if (editingDishId) {
+        update(ref(database, 'dishes/' + editingDishId), dishData)
+          .then(() => {
+            showAlert('Dish updated successfully');
+            clearForm();
+          })
+          .catch(err => showAlert('Error updating dish: ' + err.message, true));
+      } else {
+        push(dishesRef, dishData)
+          .then(() => {
+            showAlert('Dish added successfully');
+            clearForm();
+          })
+          .catch(err => showAlert('Error adding dish: ' + err.message, true));
+      }
+    });
+
+    function applyFilters() {
+      const selectedCat = filterCategory.value;
+      const selectedType = filterType.value;
+      const sortOrder = sortPrice.value;
+
+      let filtered = Object.entries(allDishes);
+
+      if (selectedCat) filtered = filtered.filter(([_, d]) => d.category === selectedCat);
+      if (selectedType) filtered = filtered.filter(([_, d]) => d.vegNonVeg === selectedType);
+      if (sortOrder === 'asc') filtered.sort((a, b) => a[1].price - b[1].price);
+      else if (sortOrder === 'desc') filtered.sort((a, b) => b[1].price - a[1].price);
+
+      renderDishes(Object.fromEntries(filtered));
+    }
+
+    [filterCategory, filterType, sortPrice].forEach(el => el.addEventListener('change', applyFilters));
+
+    onValue(dishesRef, snapshot => {
+      const dishes = snapshot.val() || {};
+      get(categoriesRef).then(catSnap => {
+        const categories = catSnap.val() || {};
+        Object.entries(dishes).forEach(([id, dish]) => {
+          dish.categoryName = categories[dish.category]?.name || 'Unknown';
+        });
+        allDishes = dishes;
+        applyFilters();
+      });
+    });
+  </script>
+</body>
+</html>
