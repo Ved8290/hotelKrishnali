@@ -42,7 +42,7 @@ document.getElementById("loginForm").addEventListener("submit", function (e) {
       message.textContent = "Login successful!";
       console.log(userCredential);
       setTimeout(() => {
-        window.location.href = "/admin/home.html";
+        window.location.href = "/hotelKrishnali/admin/home.html";
       }, 1000);
     })
     .catch((error) => {
