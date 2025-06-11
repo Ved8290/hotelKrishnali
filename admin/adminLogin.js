@@ -21,8 +21,8 @@ const auth = getAuth(app);
 onAuthStateChanged(auth, (user) => {
   if (user) {
     console.log("User is signed in:", user);
-    // Optional: redirect to dashboard if already logged in
-    // window.location.href = "/admin/home.html";
+    
+     window.location.href = "/admin/home.html";
   } else {
     console.log("No user is signed in.");
   }
