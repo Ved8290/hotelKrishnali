@@ -1,0 +1,65 @@
+/* Fullscreen background image */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: "Segoe UI", sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: url('https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1920&q=80') no-repeat center center/cover;
+}
+
+/* Glassmorphism login box */
+.login-container {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  padding: 40px 30px;
+  width: 320px;
+  color: #fff;
+  text-align: center;
+}
+
+.login-container h2 {
+  margin-bottom: 24px;
+}
+
+.login-container input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 16px;
+}
+
+.login-container input::placeholder {
+  color: #e0e0e0;
+}
+
+.login-container button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 16px;
+  background-color: #4caf50;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.login-container button:hover {
+  background-color: #45a049;
+}
+
+#message {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #ffcccb;
+}

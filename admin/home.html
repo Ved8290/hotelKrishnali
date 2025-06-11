@@ -3,24 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Admin Home</title>
     <link rel="stylesheet" href="home.css">
 </head>
 <body>
-    <h1 id="mh"> Heyy , Kuldeep <span>Welcome Back !</span></h1>
+    <h1 id="mh">Heyy, Kuldeep <span>Welcome Back!</span></h1>
     <div class="main">
+<<<<<<< HEAD
         <a href="/hotelKrishnali/admin/category.html">
           <div class="mainineer">
+=======
+        <a href="/admin/category.html">
+            <div class="mainineer">
+>>>>>>> 4b99950 (Added onAuthStateChanged for admin page protection)
                 <h1>Category</h1>
-          </div>
+            </div>
         </a>
 
+<<<<<<< HEAD
         <a href="/hotelKrishnali/admin/dishes.html">
           <div class="mainineer">
            <h1> dishes</h1>
           </div>
+=======
+        <a href="/admin/dishes.html">
+            <div class="mainineer">
+                <h1>Dishes</h1>
+            </div>
+>>>>>>> 4b99950 (Added onAuthStateChanged for admin page protection)
         </a>
-
     </div>
+
+    <script type="module">
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import app from './firebaseConfig.js';  // make sure you use correct path
+
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("User is logged in:", user.email);
+            } else {
+                alert('Admin is not logged in');
+                window.location.href = '/admin/adminLogin.html';
+            }
+        });
+    </script>
 </body>
 </html>

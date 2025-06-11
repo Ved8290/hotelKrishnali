@@ -1,5 +1,6 @@
+// firebaseConfig.js
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDyNZf3zSCUTEDZoLAoCQUPqa788rZjFq4",
@@ -12,14 +13,5 @@ const firebaseConfig = {
   measurementId: "G-SELXS1GL11"
 };
 
-
 const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
-
-
-const rootRef = ref(database);
-const categoriesRef = ref(database, 'categories');
-const dishesRef = ref(database, 'dishes');
-
-
-export { database, rootRef, categoriesRef, dishesRef ,app };
+export default app;
