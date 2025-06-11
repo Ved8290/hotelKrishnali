@@ -22,7 +22,7 @@ onAuthStateChanged(auth, (user) => {
   if (user) {
     console.log("User is signed in:", user);
     
-     window.location.href = "hotelKrishnali/admin/home.html";
+     window.location.href = "/hotelKrishnali/admin/home.html";
   } else {
     console.log("No user is signed in.");
   }
