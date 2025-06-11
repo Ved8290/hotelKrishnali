@@ -31,12 +31,13 @@ function renderDishes(dishes) {
     const li = document.createElement('li');
     li.className = 'dish-card';
 
+    // Determine the Veg/NonVeg icon
+    const vegIcon = dish.vegNonVeg === 'Veg' ? '🟢' : '🔴';
+
     li.innerHTML = `
-      <div class="dish-image" style="background-image: url('${dish.imageLink || ''}');">
-        <div class="dish-type">${dish.vegNonVeg === 'Veg' ? '🟢' : '🔴'}</div>
-      </div>
+      <div class="dish-image" style="background-image: url('${dish.imageLink || ''}');"></div>
       <div class="dish-info">
-        <h3 class="dish-name">${dish.name}</h3>
+        <h3 class="dish-name">${vegIcon} ${dish.name}</h3>
         <p class="dish-category">Category: ${dish.categoryName || 'Unknown'}</p>
         <p class="dish-price">₹${dish.price}</p>
       </div>
@@ -62,7 +63,6 @@ function applyFilters() {
   renderDishes(filteredDishes);
 }
 
-// Load categories and dishes from Firebase, then render
 async function loadData() {
   try {
     const categoriesSnapshot = await get(categoriesRef);
@@ -71,7 +71,6 @@ async function loadData() {
 
     onValue(dishesRef, snapshot => {
       const dishesData = snapshot.val() || {};
-      // Attach categoryName to each dish for display
       Object.values(dishesData).forEach(dish => {
         dish.categoryName = categories[dish.category]?.name || 'Unknown';
       });
