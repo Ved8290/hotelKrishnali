@@ -8,35 +8,27 @@
 </head>
 <body>
     <h1 id="mh">Heyy, Kuldeep <span>Welcome Back!</span></h1>
+
     <div class="main">
-<<<<<<< HEAD
+        <!-- Category Link -->
         <a href="/hotelKrishnali/admin/category.html">
-          <div class="mainineer">
-=======
-        <a href="/admin/category.html">
             <div class="mainineer">
->>>>>>> 4b99950 (Added onAuthStateChanged for admin page protection)
                 <h1>Category</h1>
             </div>
         </a>
 
-<<<<<<< HEAD
+        <!-- Dishes Link -->
         <a href="/hotelKrishnali/admin/dishes.html">
-          <div class="mainineer">
-           <h1> dishes</h1>
-          </div>
-=======
-        <a href="/admin/dishes.html">
             <div class="mainineer">
                 <h1>Dishes</h1>
             </div>
->>>>>>> 4b99950 (Added onAuthStateChanged for admin page protection)
         </a>
     </div>
 
+    <!-- Firebase Authentication Protection -->
     <script type="module">
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import app from './firebaseConfig.js';  // make sure you use correct path
+        import app from './firebaseConfig.js';  // Adjust path as necessary
 
         const auth = getAuth(app);
 
@@ -45,7 +37,7 @@
                 console.log("User is logged in:", user.email);
             } else {
                 alert('Admin is not logged in');
-                window.location.href = '/admin/adminLogin.html';
+                window.location.href = '/hotelKrishnali/admin/adminLogin.html';
             }
         });
     </script>
